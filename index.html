@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071b16">
+<title>MPL Auction 2027</title>
+<style>
+:root{--bg:#071b16;--panel:#102821;--green:#b7f34a;--muted:#b8cbc2;--line:#2b4b40}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(ellipse at top,#174c35 0,#071b16 55%);color:#f6fff9}
+header{padding:30px 18px 22px;text-align:center;border-bottom:1px solid var(--line)}
+.ball{font-size:36px}h1{margin:8px 0 6px;letter-spacing:1px;font-size:clamp(28px,7vw,44px)}h1 span{color:var(--green)}.sub{color:var(--muted);margin:0}
+.wrap{max-width:760px;margin:auto;padding:18px}.banner{border:1px solid #47735e;border-radius:18px;padding:20px;background:linear-gradient(135deg,#123d2c,#0b241c);margin-bottom:18px}
+.banner h2{margin:0 0 7px}.fee{font-size:30px;color:var(--green);font-weight:800}.small{font-size:13px;color:var(--muted);line-height:1.5}
+.card{background:rgba(16,40,33,.96);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0}
+label{display:block;font-weight:650;margin:15px 0 7px}input,select{font:inherit;width:100%;padding:12px 13px;border-radius:10px;border:1px solid #426557;background:#071b16;color:#fff}
+input[type=file]{padding:10px}input[type=checkbox]{width:auto}
+button{font:inherit;font-weight:800;background:var(--green);color:#112313;border:0;border-radius:11px;padding:14px 18px;width:100%;margin-top:18px;cursor:pointer}
+.preview{display:none;max-width:160px;max-height:160px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
+.qrbox{background:#fff;color:#17231d;border-radius:14px;padding:16px;text-align:center;margin-top:12px}
+.qrbox img{display:none;max-width:220px;width:100%;margin:10px auto}
+.qr-placeholder{width:180px;height:180px;margin:10px auto;border:2px dashed #61776b;display:flex;align-items:center;justify-content:center;color:#52635a;border-radius:10px;padding:12px}
+.notice{background:#382b10;color:#ffe4a2;padding:12px;border-radius:10px;font-size:13px;line-height:1.5}
+#result{display:none;background:#102f22;border:1px solid #497f5a;padding:14px;border-radius:12px;margin-top:15px;overflow-wrap:anywhere}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="ball">🏏</div>
+  <h1><span>MPL</span> AUCTION 2027</h1>
+  <p class="sub">Player & Team Owner Registration</p>
+</header>
+<main class="wrap">
+  <section class="banner">
+    <h2>Ready to join the auction?</h2>
+    <p class="small">Register as a player or team owner. Complete the form and follow the payment instructions.</p>
+    <div class="fee">₹400 <span style="font-size:14px;color:#dce9df;font-weight:500">registration fee</span></div>
+  </section>
+  <section class="card">
+    <h2>Registration Form</h2>
+    <p class="small">Fields marked * are required.</p>
+    <form id="registrationForm">
+      <label for="role">Registration type *</label>
+      <select id="role" required>
+        <option value="Player">Player</option>
+        <option value="Team Owner">Team Owner</option>
+      </select>
+      <label for="name">Full name *</label>
+      <input id="name" required maxlength="80" placeholder="Enter your full name">
+      <label for="room">Room number *</label>
+      <input id="room" required maxlength="30" placeholder="Enter room number">
+      <label for="phone">Mobile number *</label>
+      <input id="phone" required inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number">
+      <label for="photo">Player photo / team logo *</label>
+      <input id="photo" type="file" accept="image/*" required>
+      <img id="photoPreview" class="preview" alt="Selected image preview">
+      <hr>
+      <h3>Registration Fee & Payment</h3>
+      <div class="fee">₹400</div>
+      <div class="notice">Organizer: upload your real payment QR code below before publishing this site. Verify payments manually; this demo does not process or verify payments automatically.</div>
+      <label for="qrUpload">Organizer: choose payment QR image (site preview only)</label>
+      <input id="qrUpload" type="file" accept="image/*">
+      <div class="qrbox">
+        <strong>Scan to pay ₹400</strong>
+        <img id="qrPreview" alt="Organizer payment QR code">
+        <div id="qrPlaceholder" class="qr-placeholder">Organizer's payment QR will appear here</div>
+        <p class="small" style="color:#52635a">Only scan a QR code provided by the event organizer.</p>
+      </div>
+      <label for="proof">Payment screenshot / proof (optional for demo) *</label>
+      <input id="proof" type="file" accept="image/*" required>
+      <img id="proofPreview" class="preview" alt="Payment proof preview">
+      <label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input type="checkbox" required><span>I confirm that the information above is correct and understand that payment must be verified by the organizer.</span></label>
+      <button type="submit">Prepare Registration</button>
+    </form>
+    <div id="result" aria-live="polite"></div>
+    <p class="small">Demo notice: this single-file version previews the form on this device. It does not send entries to an organizer or securely store uploaded files. Connect a backend before collecting real registrations or payments.</p>
+  </section>
+</main>
+<footer>MPL Auction 2027 • Play fair. Bid smart.</footer>
+<script>
+function previewFile(input, img, placeholder) {
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (!file) { img.style.display='none'; if(placeholder) placeholder.style.display='flex'; return; }
+    if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); input.value=''; return; }
+    const reader = new FileReader();
+    reader.onload = e => { img.src=e.target.result; img.style.display='block'; if(placeholder) placeholder.style.display='none'; };
+    reader.readAsDataURL(file);
+  });
+}
+previewFile(document.getElementById('photo'),document.getElementById('photoPreview'));
+previewFile(document.getElementById('proof'),document.getElementById('proofPreview'));
+previewFile(document.getElementById('qrUpload'),document.getElementById('qrPreview'),document.getElementById('qrPlaceholder'));
+document.getElementById('registrationForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const role = document.getElementById('role').value;
+  const room = document.getElementById('room').value.trim();
+  const id = 'MPL27-' + Math.random().toString(36).slice(2,7).toUpperCase();
+  const result = document.getElementById('result');
+  result.style.display='block';
+  result.innerHTML = '<strong>Demo registration prepared!</strong><br>Reference: <b>'+id+'</b><br>Name: '+escapeHtml(name)+'<br>Type: '+escapeHtml(role)+'<br>Room number: '+escapeHtml(room)+'<br><br><span class="small">This reference is not submitted to the organizer. Connect a secure database and payment-verification process before launching.</span>';
+  result.scrollIntoView({behavior:'smooth',block:'center'});
+});
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body>
+</html>
